@@ -2,15 +2,17 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
 
-MS_PER_FRAME = 10
-millis = 0
+from car_module import Car
 
 width, height = 600, 600
+MS_PER_FRAME = 10
+viewer = [60,8] # rotation around z and height
+
+millis = 0
 mouse = [0,0]
+wireframe = False
 
-viewYR = 0
-
-axis_of_rotation = p,q = ((1,0,0),(1,1,1))
+car = Car((1,0,0))
 
 def draw_axis():
 	glBegin(GL_LINES)
@@ -20,42 +22,41 @@ def draw_axis():
 		glVertex3fv(v)
 	glEnd()
 
-def draw_cube():
-	glPushMatrix()
-	glColor3f(1,1,1)
-	glutWireCube(1)
-	glPopMatrix()
-
 def display():
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 	glLoadIdentity()
-	gluLookAt(0,1,2,0,0,0,0,1,0)	
-	glRotatef(viewYR,0,1,0)
-
+	
+	gluLookAt(0,viewer[1],3,0,0,0,0,1,0)	
+	glRotatef(viewer[0],0,1,0)
+	glLightfv(GL_LIGHT0,GL_POSITION,(10,20,10,1))
+	
 	draw_axis()
-
-	# draw_axis_of_rotation
-	glColor3f(1,1,0)
-	glBegin(GL_LINES)
-	glVertex3fv(p)
-	glVertex3fv(q)
-	glEnd()
-
-	# draw cube rotated around the axis
-	glTranslatef(p[0],p[1],p[2])
-	glRotatef(360.*mouse[0]/width,q[0]-p[0],q[1]-p[1],q[2]-p[2])
-	glTranslatef(-p[0],-p[1],-p[2])
-	draw_cube()
+	
+	# 1 rotation per second
+	car.set_wheel_rotation(360.0 * (millis*0.001)) 
+	car.draw()
 
 	glFlush()
 
 def init():
-	glClearColor(0,0,0,0)
+	glClearColor(1,1,1,1)
 	glEnable(GL_DEPTH_TEST)
+	
+	# turn on lighting
+	glEnable(GL_LIGHTING)
+	glEnable(GL_LIGHT0)	
+	glEnable(GL_COLOR_MATERIAL)
+	glEnable(GL_NORMALIZE)
+	glColorMaterial(GL_FRONT,GL_DIFFUSE)
+	glLightfv(GL_LIGHT0,GL_AMBIENT,(0,0,0,1))
+	glLightModelfv(GL_LIGHT_MODEL_AMBIENT,(.2,.2,.2,1))
+	
+	# enable flat shading
+	glShadeModel(GL_FLAT)
 
 	glMatrixMode(GL_PROJECTION)
 	glLoadIdentity()
-	gluPerspective(60,1,0.1,10)
+	gluPerspective(60,1,0.1,100)
 	glMatrixMode(GL_MODELVIEW)
 
 def resize(w,h):
@@ -72,26 +73,31 @@ def motion(x,y):
 def timer(i):
 	global millis
 	millis += MS_PER_FRAME
-
 	glutPostRedisplay()
 	glutTimerFunc(MS_PER_FRAME,timer,0)
 
 def key(key,x,y):
+	global wireframe
+	if (key=='w'): wireframe = not wireframe
 	glutPostRedisplay()
 
 def keysp(key,x,y):
-	global viewYR
+	global viewer	
 	if key==GLUT_KEY_LEFT:
-		viewYR += 10
+		viewer[0] -= 10
 	elif key==GLUT_KEY_RIGHT:
-		viewYR -= 10
+		viewer[0] += 10
+	elif key==GLUT_KEY_DOWN:
+		viewer[1] -= 1
+	elif key==GLUT_KEY_UP:
+		viewer[1] += 1
 	glutPostRedisplay()
 
 if __name__=="__main__":
 	glutInit()
 	glutInitWindowSize(width,height)
 	glutInitDisplayMode(GLUT_DEPTH)
-	glutCreateWindow("cube")
+	glutCreateWindow("car example")
 	init()
 	glutDisplayFunc(display)
 	glutReshapeFunc(resize)
