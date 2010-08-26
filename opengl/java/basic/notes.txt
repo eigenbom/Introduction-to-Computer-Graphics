@@ -1,0 +1,11 @@
+download jogl from: jogamp.org
+examples:
+http://pepijn.fab4.be/software/nehe-java-ports/
+
+
+jogl-demos:
+http://github.com/sgothel/jogl-demos
+
+
+under windows?
+-Dsun.java2d.noddraw=true
