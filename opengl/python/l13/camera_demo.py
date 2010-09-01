@@ -2,11 +2,15 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
 
+from camera import *
+
 MS_PER_FRAME = 10
 millis = 0
 
 width, height = 600, 600
 mouse = [0,0]
+
+camera = None
 
 def draw_axis():
 	glBegin(GL_LINES)
@@ -23,27 +27,29 @@ def draw_cube():
 	glPopMatrix()
 
 def display():
-	updateProjectionMatrix()
+	global camera
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 	glLoadIdentity()
-	gluLookAt(0,1,2,0,0,0,0,1,0)	
+
+	camera.set_fov(120.*mouse[1]/height)
+	camera.select((0,0,width,height))
 
 	draw_axis()
 	draw_cube()
 
 	glFlush()
 
-def updateProjectionMatrix():
-	glMatrixMode(GL_PROJECTION)
-	glLoadIdentity()
-	glFrustum(-1,1,-1,1,0.01 + 2.0*mouse[1]/height,10)
-	glMatrixMode(GL_MODELVIEW)
-
 def init():
+	global camera
+	camera = PerspectiveCamera(60)
+	camera.set_position((10,10,20))
+	camera.set_target((0,0,0))
+	camera.set_near(1)
+	camera.set_far(100)
+
 	glClearColor(0,0,0,0)
 	glEnable(GL_DEPTH_TEST)
-	updateProjectionMatrix()	
 
 def resize(w,h):
 	global width, height
