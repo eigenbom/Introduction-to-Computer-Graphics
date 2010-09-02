@@ -51,6 +51,9 @@ class PerspectiveCamera(Camera):
 		glMatrixMode(GL_PROJECTION)
 		glLoadIdentity()
 		gluPerspective(self.fov,1.0*w/h,self.near,self.far)
+	
+		glMatrixMode(GL_MODELVIEW)
+		glLoadIdentity()
 
 		if self.target is not None:
 			gluLookAt(self.pos[0],self.pos[1],self.pos[2],self.target[0],self.target[1],self.target[2],0,1,0)
