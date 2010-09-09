@@ -10,6 +10,7 @@ millis = 0
 width, height = 600, 600
 mouse = [0,0]
 
+
 # switch between DEPTH, NO_DEPTH_NO_CULL, NO_DEPTH_CULL
 NUM_MODES = 3
 M_DEPTH, M_NO_DEPTH_NO_CULL, M_NO_DEPTH_CULL = range(NUM_MODES)
@@ -17,6 +18,7 @@ mode_labels = {M_DEPTH:"Depth buffer enabled.", M_NO_DEPTH_NO_CULL: "No depth bu
 
 mode = M_DEPTH
 
+paused = False
 
 
 def draw_axis():
@@ -34,11 +36,12 @@ def displayBitmapString(string):
 def display():
 	global mode_labels, mode
 
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+	glClear(GL_COLOR_BUFFER_BIT)
+	if mode==M_DEPTH: glClear(GL_DEPTH_BUFFER_BIT)
 	
 	glLoadIdentity()
 
-	gluLookAt(1,2,3,0,0,0,0,1,0)	
+	gluLookAt(.3,1.1,1.5,0,0,0,0,1,0)	
 	draw_axis()
 	glRotatef(360.*millis*0.001*.2,1,0,0)
 	glRotatef(360.*millis*0.001*.07,0,1,0)
@@ -93,15 +96,19 @@ def motion(x,y):
 	glutPostRedisplay()
 
 def timer(i):
-	global millis
-	millis += MS_PER_FRAME
+	global millis, paused
+	if not paused:
+		millis += MS_PER_FRAME
 	glutPostRedisplay()
 	glutTimerFunc(MS_PER_FRAME,timer,0)
 
 def key(key,x,y):
-	global mode
-	mode = (mode + 1) % NUM_MODES
-	update_mode()
+	global mode, paused
+	if key==' ':
+		mode = (mode + 1) % NUM_MODES
+		update_mode()
+	elif key=='p':
+		paused = not paused
 	glutPostRedisplay()
 
 def keysp(key,x,y):
