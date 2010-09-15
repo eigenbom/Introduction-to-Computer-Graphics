@@ -10,6 +10,8 @@ mouse = [0,0]
 
 window = 0 # window id
 
+rotation = 0
+
 def draw_axis():
 	glBegin(GL_LINES)
 	for v in [(1,0,0),(0,1,0),(0,0,1)]:
@@ -25,15 +27,13 @@ def draw_cube():
 	glPopMatrix()
 
 def display():
-	# put the mouse cursor back in the middle
-	glutWarpPointer(width/2,height/2)
 	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 	glLoadIdentity()
 	gluLookAt(0,1,2,0,0,0,0,1,0)	
 
 	draw_axis()
-	glRotatef(360.*mouse[0]/width,1,0,0)
+	glRotatef(360.*rotation,0,1,0)
 	draw_cube()
 
 	glFlush()
@@ -56,8 +56,22 @@ def resize(w,h):
 	glutPostRedisplay()
 
 def motion(x,y):
-	global mouse
+	global mouse, rotation
 	mouse = x, y
+	if x==width/2 and y==height/2:
+		glutPostRedisplay()
+		return
+	
+	# print("Motion %d,%d"%(x,y))
+
+	dx = 1.0*(x - width/2)/width
+	dy = 1.0*(y - height/2)/height
+	
+	rotation += dx
+
+	# put the mouse cursor back in the middle
+	glutWarpPointer(width/2,height/2)
+	
 	glutPostRedisplay()
 
 def timer(i):
