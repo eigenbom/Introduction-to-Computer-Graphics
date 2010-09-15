@@ -23,9 +23,9 @@ millis = 0
 parameters = ParameterList([
 	MouseParameter("Orientation","Modify the teapot orientation.", [0,0], 
 		lambda (x,y): (2*360.*x/width,360.*y/height) ),
-	MouseParameter("Shininess","Change the material shininess.", 0,
+	MouseParameter("Shininess","Change the material shininess.", 5,
 		lambda (x,y): 100.*x/width),
-	MouseParameter("Specular", "Change the materials specularity.", (0,0,0,1),
+	MouseParameter("Specular", "Change the materials specularity.", (0.5,0.5,0.5,1),
 		lambda (x,y): (1.*x/width,1.*x/width,1.*x/width,1)),
 	MouseParameter("LightPosition", "Change the light x-z pos.", [2.1,2.3],
 		lambda (x,y): (-2+4.*x/width,-2+4.*y/height)),
