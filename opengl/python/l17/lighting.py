@@ -21,22 +21,39 @@ millis = 0
 # to make this easy we need a general parameter system
 
 parameters = ParameterList([
-	MouseParameter("Orientation","Modify the teapot orientation.", [0,0], 
-		lambda (x,y): (2*360.*x/width,360.*y/height) ),
+	MouseParameter("Object Orientation","Modify the teapot orientation.", [0,0], 
+		lambda (x,y): (360.*x/width,0*360.*y/height) ),
+	MouseParameter("Camera Orientation","Modify the camera orientation.", [0,0], 
+		lambda (x,y): (360.*x/width,0*360.*y/height) ),
 	MouseParameter("Shininess","Change the material shininess.", 5,
 		lambda (x,y): 100.*x/width),
 	MouseParameter("Specular", "Change the materials specularity.", (0.5,0.5,0.5,1),
 		lambda (x,y): (1.*x/width,1.*x/width,1.*x/width,1)),
-	MouseParameter("LightPosition", "Change the light x-z pos.", [2.1,2.3],
+	MouseParameter("LightPosition", "Change the light x-z pos.", [2.1,0],
 		lambda (x,y): (-2+4.*x/width,-2+4.*y/height)),
 	MouseParameter("LightDistance", "Change the y-coord of the light.", 2.2,
 		lambda (x,y): 20*1.0*(height-y)/height),
 ])
 
+NUM_OBJECTS = 2
+object = 0
+render_object = [lambda: glutSolidTeapot(1), lambda: glutSolidSphere(1,16,16)]
+
+smooth_shading = False
+
 def display():
+	if smooth_shading:
+		glShadeModel(GL_SMOOTH)
+	else:
+		glShadeModel(GL_FLAT)
+	
+	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 	glLoadIdentity()
+	
 	gluLookAt(2,2,2,0,0,0,0,1,0)
+	glRotate(parameters.get("Camera Orientation").value[0],0,1,0)
+
 	glColor3f(1,1,0)	
 	lxz = parameters.get("LightPosition").value
 	ly = parameters.get("LightDistance").value
@@ -45,13 +62,14 @@ def display():
 	glMaterialfv(GL_FRONT, GL_SPECULAR, parameters.get("Specular").value)
 	glMaterialf(GL_FRONT, GL_SHININESS, parameters.get("Shininess").value)
 
-	orientation = parameters.get("Orientation").value
+	orientation = parameters.get("Object Orientation").value
 	glRotatef(orientation[0],0,1,0)
 	glRotatef(orientation[1],1,0,0)
 	
 	#glRotatef(2*360.*mouse[0]/width,0,1,0)
 	#glRotatef(360.*mouse[1]/height,1,0,0)
-	glutSolidTeapot(1)
+	#glutSolidTeapot(1)
+	render_object[object]()
 
 	parameters.draw(-1,-0.5)
 	glFlush()
@@ -90,8 +108,10 @@ def timer(i):
 	glutTimerFunc(MS_PER_FRAME,timer,0)
 
 def key(key,x,y):
-	global parameters
+	global parameters, object, smooth_shading
 	if key==' ': parameters.next()
+	elif key=='o': object = (object+1)%NUM_OBJECTS
+	elif key=='s': smooth_shading = not smooth_shading
 
 	glutPostRedisplay()
 
