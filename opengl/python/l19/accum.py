@@ -57,9 +57,9 @@ def display():
 	monkey.draw()
 
 	if accum:
-		# add results into accum and multiply by some small amount 
-		glAccum(GL_ACCUM, .05)
+		# darken accum buffer, then add results into accum 
 		glAccum(GL_MULT, .95)
+		glAccum(GL_ACCUM, .05)
 	
 		# read accumulation buffer back into colour buffer
 		glAccum(GL_RETURN, 1)
