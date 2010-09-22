@@ -1,5 +1,5 @@
 #
-# Demonstrates the use of a sphere map.
+# Demonstrates the use of the accumulation buffer
 # BP 21.09.2010
 #
 
@@ -11,10 +11,17 @@ from PIL import Image
 
 width, height = 600, 600
 mouse = [0,0]
-
+MS_PER_FRAME = 10
+millis = 0
 from geometry import *
 
 monkey = None # GeometricModel
+
+accum = False
+
+def toggle_accum():
+	global accum
+	accum = not accum
 
 def load_image_and_bind():
 	global img_data, img_size
@@ -39,6 +46,8 @@ def load_image_and_bind():
 def display():
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 	glLoadIdentity()
+
+	# render scene
 	
 	gluLookAt(1.5,1.5,1.3,0,0,0,0,1,0)
 	glColor3f(1,1,1)	
@@ -47,6 +56,14 @@ def display():
 
 	monkey.draw()
 
+	if accum:
+		# add results into accum and multiply by some small amount 
+		glAccum(GL_ACCUM, .05)
+		glAccum(GL_MULT, .95)
+	
+		# read accumulation buffer back into colour buffer
+		glAccum(GL_RETURN, 1)
+	
 	glFlush()
 
 def init():
@@ -64,6 +81,16 @@ def init():
 
 	load_image_and_bind()
 
+	glClearAccum(0,0,0,1)
+	glClear(GL_ACCUM_BUFFER_BIT)
+
+def timer(i):
+	global millis
+	millis += MS_PER_FRAME
+	glutPostRedisplay()
+	glutTimerFunc(MS_PER_FRAME,timer,0)
+
+
 def resize(w,h):
 	global width, height
 	width, height = w,h
@@ -75,14 +102,20 @@ def motion(x,y):
 	mouse = x,y
 	glutPostRedisplay()
 
+def key(key,x,y):
+	toggle_accum()
+	glutPostRedisplay()
+
 if __name__=="__main__":
 	glutInit()
 	glutInitWindowSize(width,height)
-	glutInitDisplayMode(GLUT_SINGLE | GLUT_DEPTH)
+	glutInitDisplayMode(GLUT_SINGLE | GLUT_DEPTH | GLUT_ACCUM)
 	glutCreateWindow("shiny monkey time!")
 	init()
 	glutDisplayFunc(display)
 	glutReshapeFunc(resize)
 	glutPassiveMotionFunc(motion)
+	glutKeyboardFunc(key)
+	glutTimerFunc(MS_PER_FRAME,timer,0)
 	glutMainLoop()
 

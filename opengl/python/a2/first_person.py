@@ -12,6 +12,7 @@ from OpenGL.GLU import *
 from OpenGL.GLUT import *
 import math
 
+from enemy import Enemy
 from complex import Complex
 
 MS_PER_FRAME = 10
@@ -48,12 +49,21 @@ class Character(object):
 
 complex = None
 character = None
+enemy = None
 
 def setup_scene():
-	global complex, character
+	global complex, character, enemy
 	complex = Complex()
 	character = Character()
 	character.set_pos(complex.starting_position)
+	enemy = Enemy()
+	enemy.set_pos(character.pos[0], character.pos[1], character.pos[2])
+
+
+def update_scene():
+	global character
+	h = [character.pos[i]-enemy.pos[i] for i in [0,1,2]]
+	enemy.set_heading(h[0],h[2])
 
 def draw_axis():
 	glBegin(GL_LINES)
@@ -98,11 +108,15 @@ def display():
 	# draw the complex
 	complex.draw()
 
+	enemy.draw()
+
 	glFlush()
 
 def init():
 	glClearColor(0,0,0,0)
 	glEnable(GL_DEPTH_TEST)
+	glEnable(GL_BLEND)
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
 	glEnable(GL_LIGHTING)
 	glEnable(GL_LIGHT0)
@@ -147,7 +161,8 @@ def motion(x,y):
 
 def timer(i):
 	global millis
-	millis += MS_PER_FRAME
+	millis += MS_PER_FRAME	
+	update_scene()
 	glutPostRedisplay()
 	glutTimerFunc(MS_PER_FRAME,timer,0)
 
