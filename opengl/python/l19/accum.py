@@ -58,8 +58,8 @@ def display():
 
 	if accum:
 		# darken accum buffer, then add results into accum 
-		glAccum(GL_MULT, .95)
-		glAccum(GL_ACCUM, .05)
+		glAccum(GL_MULT, .999)
+		glAccum(GL_ACCUM, .001)
 	
 		# read accumulation buffer back into colour buffer
 		glAccum(GL_RETURN, 1)
